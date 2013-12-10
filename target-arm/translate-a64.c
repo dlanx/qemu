@@ -3617,6 +3617,7 @@ static void handle_simd_shifti(DisasContext *s, uint32_t insn)
     int opcode = get_bits(insn, 11, 5);
     int immb = get_bits(insn, 16, 3);
     int immh = get_bits(insn, 19, 4);
+    bool is_scalar = get_bits(insn, 28, 1);
     bool is_u = get_bits(insn, 29, 1);
     bool is_q = get_bits(insn, 30, 1);
     bool accumulate = get_bits(insn, 12, 1);
@@ -3658,6 +3659,7 @@ static void handle_simd_shifti(DisasContext *s, uint32_t insn)
 	    unallocated_encoding(s);
 	    return;
 	}
+	if (is_scalar) is_q = false;
 	accumulate = round = false;
 	shift = shift - (8 << size);
 	break;
@@ -4474,6 +4476,9 @@ void disas_a64_insn(CPUARMState *env, DisasContext *s)
             handle_fpdp3s32(s, insn);
         } else if (!get_bits(insn, 29, 3) && (get_bits(insn, 22, 2) == 0x1)) {
             handle_fpdp3s64(s, insn);
+        } else if (!get_bits(insn, 31, 1) && !get_bits(insn, 23, 1) &&
+            get_bits(insn, 10, 1) && (get_bits(insn, 11, 5) == 0xA)) {
+            handle_simd_shifti(s, insn);
         } else {
             goto unknown_insn;
         }
