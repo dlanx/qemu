@@ -4467,6 +4467,9 @@ void disas_a64_insn(CPUARMState *env, DisasContext *s)
 	    } else {
 		handle_scpsp (s, insn);
 	    }
+        } else if (get_bits(insn, 17, 5) == 0x10 &&
+                   get_bits(insn, 11, 1) && !get_bits(insn, 10, 1)) {
+            handle_simd_misc(s, insn);
         } else {
             goto unknown_insn;
         }
