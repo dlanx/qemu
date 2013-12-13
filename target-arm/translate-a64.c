@@ -2839,6 +2839,7 @@ static void handle_simd3s(DisasContext *s, uint32_t insn)
     int opcode = get_bits(insn, 11, 5);
     bool is_q = get_bits(insn, 30, 1);
     bool is_u = get_bits(insn, 29, 1);
+    bool is_scalar = get_bits(insn, 28, 1);
     bool is_pair = is_u;
     bool is_float = false;
     bool is_op2 = false;
@@ -2893,6 +2894,8 @@ static void handle_simd3s(DisasContext *s, uint32_t insn)
 	    unallocated_encoding(s);
 	    return;
 	}
+    case 0x08: /* USHL */
+	if (is_scalar) is_q = false;
 	break;
     }
 
@@ -4470,6 +4473,8 @@ void disas_a64_insn(CPUARMState *env, DisasContext *s)
         } else if (get_bits(insn, 17, 5) == 0x10 &&
                    get_bits(insn, 11, 1) && !get_bits(insn, 10, 1)) {
             handle_simd_misc(s, insn);
+        } else if (get_bits(insn, 21, 1) && get_bits(insn, 10, 1)) {
+	      handle_simd3s(s, insn);
         } else {
             goto unknown_insn;
         }
