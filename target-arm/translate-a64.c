@@ -3460,6 +3460,20 @@ static void handle_simd_misc(DisasContext *s, uint32_t insn)
 	      tcg_temp_free_i64(zero);
 	  }
 	}
+    case 0x09: /* CMEQ */
+	{
+	  bool is_scalar = get_bits(insn, 28, 1);
+          TCGv_i64 tcg_zero = tcg_const_i64(0);
+	  if (is_scalar) {
+	      if (size != 3) {
+		  unallocated_encoding(s);
+		  return;
+	      }
+              tcg_gen_setcond_i64 (TCG_COND_NE, tcg_res, tcg_op1, tcg_zero);
+              tcg_gen_subi_i64 (tcg_res, tcg_res, 1);
+              simd_st(tcg_res, freg_offs_d, 3);
+	  }
+        }
 	break;
     default:
 	unallocated_encoding(s);
